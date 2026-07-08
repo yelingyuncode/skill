@@ -32,6 +32,8 @@
 - 找不到路由 → **404**
 - 系统崩了 → **500**（走全局错误处理）
 
+这是白鲨内部系统 API 约定，用来统一后台前端拦截器行为；对外开放 API 不默认套用这个约定，应按项目 ADR 重新说明状态码策略。
+
 ## §3 后端实现
 
 ### 业务错：用带 `businessError` 标记的 Error
@@ -66,13 +68,13 @@ fastify.post('/orders/:id/release', async (req, reply) => {
 
   try {
     return db.transaction(() => {
-      const order = db.prepare('SELECT * FROM `order` WHERE id=?').get(id);
+      const order = db.prepare('SELECT * FROM sales_order WHERE id=?').get(id);
       if (!order) throw businessError('NOT_FOUND', '订单不存在');
       if (order.status === 'cancelled') throw businessError('ALREADY_CANCELLED', '订单已作废');
       assertTransition(order.status, 'released');  // 内部也会 throw businessError
 
-      db.prepare("UPDATE `order` SET status='released', updated_at=?, updated_by=? WHERE id=?").run(now(), user.id, id);
-      audit({ user, entity:'order', entityId:id, action:'status_change',
+      db.prepare("UPDATE sales_order SET status='released', updated_at=?, updated_by=? WHERE id=?").run(now(), user.id, id);
+      audit({ user, entity:'sales_order', entityId:id, action:'status_change',
               before:{status:order.status}, after:{status:'released'} });
 
       return { ok: true, data: { id, status: 'released' } };

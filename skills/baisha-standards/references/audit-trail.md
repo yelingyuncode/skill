@@ -10,7 +10,7 @@ CREATE TABLE audit_log (
   ts           INTEGER NOT NULL,               -- 秒级 unix ts
   actor_id     INTEGER NOT NULL,               -- 谁做的（账号 ID）
   actor_name   TEXT NOT NULL,                  -- 冗余存名字，账号删了也能查
-  entity       TEXT NOT NULL,                  -- 'order' / 'work_order' / 'stock' 等
+  entity       TEXT NOT NULL,                  -- 'sales_order' / 'work_order' / 'stock' 等
   entity_id    TEXT NOT NULL,                  -- 该实体的主键，转成字符串
   action       TEXT NOT NULL,                  -- 'create' / 'update' / 'delete' / 'status_change' / 'login' / 'export'
   before_json  TEXT,                           -- 变更前快照（UPDATE / status_change 时）
@@ -84,7 +84,7 @@ function diffOnly(a, b) {
 ```js
 db.transaction(() => {
   const orderId = insertOrder(...);
-  audit({ user, entity: 'order', entityId: orderId, action: 'create',
+  audit({ user, entity: 'sales_order', entityId: orderId, action: 'create',
           after: { order_no, items_count: items.length, status: 'draft' }});
 })();
 ```
@@ -93,10 +93,10 @@ db.transaction(() => {
 
 ```js
 db.transaction(() => {
-  const before = db.prepare('SELECT * FROM `order` WHERE id=?').get(id);
-  db.prepare('UPDATE `order` SET remark=?, updated_at=?, updated_by=? WHERE id=?').run(remark, now(), user.id, id);
-  const after = db.prepare('SELECT * FROM `order` WHERE id=?').get(id);
-  audit({ user, entity: 'order', entityId: id, action: 'update', before, after });
+  const before = db.prepare('SELECT * FROM sales_order WHERE id=?').get(id);
+  db.prepare('UPDATE sales_order SET remark=?, updated_at=?, updated_by=? WHERE id=?').run(remark, now(), user.id, id);
+  const after = db.prepare('SELECT * FROM sales_order WHERE id=?').get(id);
+  audit({ user, entity: 'sales_order', entityId: id, action: 'update', before, after });
 })();
 ```
 
@@ -106,8 +106,8 @@ db.transaction(() => {
 db.transaction(() => {
   const before = { status: 'pending' };
   assertTransition('pending', 'released');
-  db.prepare("UPDATE `order` SET status='released', updated_at=?, updated_by=? WHERE id=?").run(now(), user.id, id);
-  audit({ user, entity: 'order', entityId: id, action: 'status_change',
+  db.prepare("UPDATE sales_order SET status='released', updated_at=?, updated_by=? WHERE id=?").run(now(), user.id, id);
+  audit({ user, entity: 'sales_order', entityId: id, action: 'status_change',
           before, after: { status: 'released' }, remark: '车间审核通过' });
 })();
 ```

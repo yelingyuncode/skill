@@ -26,7 +26,7 @@
 - ✅ 事务边界（见 [transactions.md](transactions.md)）
 - ✅ 审计（见 [audit-trail.md](audit-trail.md)）
 - ✅ 权限检查
-- ✅ 5 字段兜底（见 [business-fields.md](business-fields.md)）
+- ✅ 5 类兜底字段（见 [business-fields.md](business-fields.md)）
 
 **能省的**（AI 常写但不需要的）：
 - ❌ 空的 try/catch 只是为了"看起来严谨"
@@ -124,7 +124,7 @@ Element Plus + Vue 3 + 骨架里默认引的这些包：
 | 对象合并 | `{...a, ...b}` / `Object.assign` | lodash.merge |
 | 数组去重 | `[...new Set(arr)]` | lodash.uniq |
 | 防抖 / 节流 | Vue 3 的 `useDebounceFn` / `useThrottleFn`（如果用 vueuse）；或手写 5 行 setTimeout | lodash.debounce（14 KB） |
-| UUID | `crypto.randomUUID()`（**Node 20+/浏览器原生**） | uuid 包 |
+| UUID | `crypto.randomUUID()`（**Node 18+/浏览器原生**） | uuid 包 |
 | 字符串模板 | 反引号 `` `${a}` `` | template literal 库 |
 
 **Node.js / 浏览器现代 API 已经能做的 = 不用装包**。安装一个包意味着：

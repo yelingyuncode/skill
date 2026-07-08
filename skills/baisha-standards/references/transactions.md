@@ -10,8 +10,8 @@
 
 | 业务动作 | 涉及表 | 事务边界 |
 |---|---|---|
-| 提交订单 | order + order_item + audit_log | 全部一个 transaction |
-| 审核订单 | order.status + audit_log | 一个 transaction |
+| 提交订单 | sales_order + order_item + audit_log | 全部一个 transaction |
+| 审核订单 | sales_order.status + audit_log | 一个 transaction |
 | 发布工单到车间 | work_order + machine_assignment + audit_log | 一个 transaction |
 | 领料 | material_move + stock + audit_log | 一个 transaction |
 | 报工完成 | work_order.status + production_log + stock（成品入库） + audit_log | 一个 transaction |
@@ -37,7 +37,7 @@ fastify.post('/orders', async (req, reply) => {
 
       // ② 插主表
       const orderId = db.prepare(`
-        INSERT INTO \`order\`(order_no, created_at, updated_at, created_by, updated_by, status, remark)
+        INSERT INTO sales_order(order_no, created_at, updated_at, created_by, updated_by, status, remark)
         VALUES (?, ?, ?, ?, ?, 'draft', ?)
       `).run(orderNo, now(), now(), user.id, user.id, remark ?? '').lastInsertRowid;
 
@@ -49,7 +49,7 @@ fastify.post('/orders', async (req, reply) => {
       for (const it of items) insItem.run(orderId, it.product_id, it.qty, now(), now(), user.id, user.id);
 
       // ④ 审计
-      audit(user.id, 'order', orderId, 'create', { orderNo, itemCount: items.length });
+      audit(user.id, 'sales_order', orderId, 'create', { orderNo, itemCount: items.length });
 
       return { orderId, orderNo };
     })();
@@ -114,10 +114,10 @@ db.transaction(() => {
 
 ```js
 db.transaction(() => {
-  const order = db.prepare('SELECT status FROM `order` WHERE id=?').get(id);
+  const order = db.prepare('SELECT status FROM sales_order WHERE id=?').get(id);
   if (order.status === 'released') return { alreadyDone: true }; // 已发布，直接成功
   assertTransition(order.status, 'released');
-  db.prepare("UPDATE `order` SET status='released', updated_at=?, updated_by=? WHERE id=?").run(now(), user.id, id);
+  db.prepare("UPDATE sales_order SET status='released', updated_at=?, updated_by=? WHERE id=?").run(now(), user.id, id);
 })();
 ```
 
@@ -198,7 +198,7 @@ SQLite WAL 模式下**读不阻塞**、**写串行**。5-15 人日常够用，**
 ```js
 // 前端把 version 传回来
 const r = db.prepare(`
-  UPDATE \`order\` SET remark=?, updated_at=?, updated_by=?, version=version+1
+  UPDATE sales_order SET remark=?, updated_at=?, updated_by=?, version=version+1
   WHERE id=? AND version=?
 `).run(remark, now(), user.id, id, clientVersion);
 

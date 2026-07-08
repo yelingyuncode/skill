@@ -147,7 +147,7 @@ docs/
 | 后端文件 | kebab-case.js | `work-order.js` |
 | 前端 SFC 组件 | PascalCase.vue | `OrderList.vue` |
 | 前端 utility js | kebab-case.js | `format-date.js` |
-| 数据库表 | 单数 snake_case | `order` / `work_order` |
+| 数据库表 | 单数 snake_case | `sales_order` / `work_order` |
 | 数据库字段 | snake_case | `created_at` |
 | API 路径 | kebab-case，复数资源 | `/api/work-orders` |
 | API 参数 | camelCase（JSON body） | `{workshopId: 5}` |

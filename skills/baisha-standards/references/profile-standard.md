@@ -138,7 +138,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from .base import BusinessBase
 
 class Order(BusinessBase):
-    __tablename__ = 'order'
+    __tablename__ = 'sales_order'
 
     order_no:      Mapped[str]  = mapped_column(String(32), nullable=False, unique=True, index=True)
     customer_id:   Mapped[int]  = mapped_column(BigInteger, nullable=False, index=True)
@@ -200,7 +200,7 @@ async def release_order(db, user, order_id):
     order.status = 'released'
     order.updated_at = int(time.time())
     order.updated_by = user.id
-    await write_audit(db, user, 'order', order_id, 'status_change',
+    await write_audit(db, user, 'sales_order', order_id, 'status_change',
                       before={'status': order.status}, after={'status': 'released'})
 ```
 

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Baisha Standards"
+  short_description: "白鲨内部系统开发规范"
+  default_prompt: "用 $baisha-standards 开发或评审白鲨内部管理系统的功能。"
+
+policy:
+  allow_implicit_invocation: true

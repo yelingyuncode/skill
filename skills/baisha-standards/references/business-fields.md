@@ -1,8 +1,8 @@
 # 业务字段兜底规范
 
-每一张业务表都必须先有这 5 项，才允许加业务字段。缺一项 = review 打回。
+每一张业务表都必须先有这 5 类兜底字段，才允许加业务字段。缺一类 = review 打回。
 
-## 5 项兜底
+## 5 类兜底字段
 
 ```sql
 -- 每张业务表的最小骨架
@@ -41,7 +41,7 @@ CREATE TABLE {{业务表名}} (
 
 ## 命名规则
 
-- 表名：**单数 snake_case**：`order` / `work_order` / `stock_move`（不用 `orders`）
+- 表名：**单数 snake_case**：`sales_order` / `work_order` / `stock_move`（不用 `orders`；避免使用 `order` 这类 SQL 保留字）
 - 字段名：**snake_case**：`created_at` / `assigned_user_id`
 - 外键：**关联表名 + `_id`**：`order_id` / `product_id`
 - 布尔字段：**尽量避免**；实在要用 `is_xxx` 且明确"没有第三种可能"（`is_locked` 而非 `is_active`）
@@ -57,9 +57,9 @@ CREATE TABLE {{业务表名}} (
 - 业务查询高频字段：单号 `order_no`, 批号 `batch_no`, 工号 `emp_no`
 
 ```sql
-CREATE INDEX idx_order_status_created ON `order`(status, created_at DESC);
-CREATE INDEX idx_order_created_by     ON `order`(created_by);
-CREATE INDEX idx_order_no             ON `order`(order_no);
+CREATE INDEX idx_sales_order_status_created ON sales_order(status, created_at DESC);
+CREATE INDEX idx_sales_order_created_by     ON sales_order(created_by);
+CREATE INDEX idx_sales_order_no             ON sales_order(order_no);
 ```
 
 **别过度索引**：SQLite 每个索引都要维护，5000 行以下的表可以不加索引。
